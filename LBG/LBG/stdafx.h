@@ -15,6 +15,4 @@
 #include <string.h>
 #include <float.h>
 
-
-
 // TODO: reference additional headers your program requires here

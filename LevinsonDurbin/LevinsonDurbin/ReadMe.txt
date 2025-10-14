@@ -37,7 +37,7 @@ Other notes:
 AppWizard uses "TODO:" comments to indicate parts of the source code you
 should add to or customize.
 
-/////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Overview:
 	This program processes speech recordings of vowel sounds and extracts Linear Predictive Coding (LPC) coefficients (a1 to a12).
@@ -59,13 +59,13 @@ Constants Defined:
 	p				12			Number of LPC coefficients to compute.
 
 Program Flow:
-	Step 1 – Processing Multiple Files
-	step 2 – File Reading
-	Step 3 – Energy Calculation (volt[])
-	Step 4 – Voice Activity Detection
-	Step 5 – Autocorrelation Computation
-	Step 6 – Levinson-Durbin Algorithm
-	Step 7 – Save Output
+	Step 1 ï¿½ Processing Multiple Files
+	step 2 ï¿½ File Reading
+	Step 3 ï¿½ Energy Calculation (volt[])
+	Step 4 ï¿½ Voice Activity Detection
+	Step 5 ï¿½ Autocorrelation Computation
+	Step 6 ï¿½ Levinson-Durbin Algorithm
+	Step 7 ï¿½ Save Output
 
 
 Instructions to Run:
@@ -90,4 +90,4 @@ Key Features:
 	Autocorrelation-based LPC feature extraction.
 	Saves results in separate files for further analysis.
 
-/////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

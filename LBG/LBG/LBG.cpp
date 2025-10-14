@@ -3,14 +3,13 @@
 // Initialization
 #include "stdafx.h"
 
-#define K 8				// Codebook size
-#define P 12			// LPC prediction order
-#define S 200			// line size
-#define M 6340			// Universe size
-#define E 0.03			// Epsilon
+#define K 8	   // Codebook size
+#define P 12   // LPC prediction order
+#define S 200  // line size
+#define M 6340 // Universe size
+#define E 0.03 // Epsilon
 
 float WEIGHTS[P] = {1.0, 3.0, 7.0, 13.0, 19.0, 22.0, 25.0, 33.0, 42.0, 50.0, 56.0, 61.0};
-
 
 void takeInput(float vector[][P])
 {
@@ -28,18 +27,18 @@ void takeInput(float vector[][P])
 	{
 		j = 0;
 		char *ptr = line;
-        while (sscanf_s(ptr, "%f", &vector[i][j]) && j < P)
+		while (sscanf_s(ptr, "%f", &vector[i][j]) && j < P)
 		{
-            j++;
-            ptr = strchr(ptr, ',');
-            if (!ptr) break;
-            ptr++;
-        }
+			j++;
+			ptr = strchr(ptr, ',');
+			if (!ptr)
+				break;
+			ptr++;
+		}
 		i++;
 	}
 	fclose(fin);
 }
-
 
 int makeCodebook(float codebook[][P], float newCodebook[][P], int size)
 {
@@ -56,64 +55,62 @@ int makeCodebook(float codebook[][P], float newCodebook[][P], int size)
 	{
 		for (j = 0; j < P; j++)
 		{
-			newCodebook[2*i][j] = codebook[i][j] + E;
-			newCodebook[2*i + 1][j] = codebook[i][j] - E;
+			newCodebook[2 * i][j] = codebook[i][j] + E;
+			newCodebook[2 * i + 1][j] = codebook[i][j] - E;
 		}
 	}
 
-    for (i = 0; i < 2*size; i++)
+	for (i = 0; i < 2 * size; i++)
 		for (j = 0; j < P; j++)
 			codebook[i][j] = newCodebook[i][j];
-    
-    return 2*size;
-}
 
+	return 2 * size;
+}
 
 void storeOutput(float codebook[][P], int size)
 {
 	FILE *fout;
-    int i, j;
-    char input[S];
+	int i, j;
+	char input[S];
 
-    sprintf(input, "C:\\Users\\panda\\Documents\\M Tech\\Sem 1\\Speech Processing\\Record Vector\\LBG_Output_%d.csv", size);
-    if (fopen_s(&fout, input, "w"))
-        return;
+	sprintf(input, "C:\\Users\\panda\\Documents\\M Tech\\Sem 1\\Speech Processing\\Record Vector\\LBG_Output_%d.csv", size);
+	if (fopen_s(&fout, input, "w"))
+		return;
 
-    for (i = 0; i < size; i++) 
-    {
-        for (j = 0; j < P; j++) 
-        {
-            fprintf(fout, "%f", codebook[i][j]);
+	for (i = 0; i < size; i++)
+	{
+		for (j = 0; j < P; j++)
+		{
+			fprintf(fout, "%f", codebook[i][j]);
 
-            // comma separator
-            if (j < P - 1) 
-                fprintf(fout, ","); 
-        }
-        // new line after each row
-        fprintf(fout, "\n"); 
-    }
-	
-    fclose(fout);
+			// comma separator
+			if (j < P - 1)
+				fprintf(fout, ",");
+		}
+		// new line after each row
+		fprintf(fout, "\n");
+	}
+
+	fclose(fout);
 }
-
 
 void kMeansClustering(float vector[][P], float codebook[][P], float newCodebook[][P], int size)
 {
-    float d, dist, minDist, totalDist = 0.0f, distance[K] = {0.0f}, centroid[K][P] = {0.0f};
-    int i, j, k, group[M], freq[K] = {0};
+	float d, dist, minDist, totalDist = 0.0f, distance[K] = {0.0f}, centroid[K][P] = {0.0f};
+	int i, j, k, group[M], freq[K] = {0};
 
-    // Tokhura's Distance
+	// Tokhura's Distance
 	for (i = 0; i < M; i++)
 	{
 		minDist = FLT_MAX;
 		for (j = 0; j < size; j++)
 		{
 			dist = 0.0f;
-			for (k = 0; k < P; k++) 
-            {
-                d = codebook[j][k] - vector[i][k];
-                dist += WEIGHTS[k] * d * d;
-            }
+			for (k = 0; k < P; k++)
+			{
+				d = codebook[j][k] - vector[i][k];
+				dist += WEIGHTS[k] * d * d;
+			}
 
 			if (minDist > dist)
 			{
@@ -127,43 +124,42 @@ void kMeansClustering(float vector[][P], float codebook[][P], float newCodebook[
 		distance[j] += minDist;
 		freq[j]++;
 		totalDist += minDist;
-		for (k = 0; k < P; k++) 
+		for (k = 0; k < P; k++)
 			centroid[j][k] += vector[i][k];
 	}
 
-    printf("Turn %d:-\n", size);
+	printf("Turn %d:-\n", size);
 	for (j = 0; j < size; j++)
 	{
-		if (freq[j] == 0) 
+		if (freq[j] == 0)
 			continue;
 
-		distance[j] /= (float) freq[j];
+		distance[j] /= (float)freq[j];
 		printf("%d\t:\t%d\t&\t%f\n", j, freq[j], distance[j]);
 
-        for (k = 0; k < P; k++) 
+		for (k = 0; k < P; k++)
 			newCodebook[j][k] = centroid[j][k] / freq[j];
 	}
 
-    totalDist /= (float) M;
-    printf("\nDistortion:\t\t\t%f\n\n\n", totalDist);
+	totalDist /= (float)M;
+	printf("\nDistortion:\t\t\t%f\n\n\n", totalDist);
 }
-
 
 void LindeBuzoGray(float vector[][P], float codebook[][P], float newCodebook[][P], int size)
 {
-    int j, k;
-    kMeansClustering(vector, codebook, newCodebook, size);
+	int j, k;
+	kMeansClustering(vector, codebook, newCodebook, size);
 
 	for (j = 0; j < size; j++)
 		printf("%d\t\t", j);
 	for (k = 0; k < P; k++)
 	{
 		printf("\n");
-		for (j = 0; j < size; j++) 
-        {
+		for (j = 0; j < size; j++)
+		{
 			printf("%f\t", codebook[j][k]);
-            codebook[j][k] = newCodebook[j][k];
-        }
+			codebook[j][k] = newCodebook[j][k];
+		}
 	}
 	printf("\n\n");
 	for (j = 0; j < size; j++)
@@ -171,16 +167,15 @@ void LindeBuzoGray(float vector[][P], float codebook[][P], float newCodebook[][P
 	for (k = 0; k < P; k++)
 	{
 		printf("\n");
-		for (j = 0; j < size; j++) 
+		for (j = 0; j < size; j++)
 			printf("%f\t", codebook[j][k]);
 	}
 	printf("\n\n\n");
 
-    storeOutput(codebook, size);
+	storeOutput(codebook, size);
 }
 
-
-int _tmain(int argc, _TCHAR* argv[])
+int _tmain(int argc, _TCHAR *argv[])
 {
 	int j, k, size = 0;
 	float vector[M][P], codebook[K][P], newCodebook[K][P];
@@ -188,7 +183,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	takeInput(vector);
 	while (size < K)
 	{
-        size = makeCodebook(codebook, newCodebook, size);
+		size = makeCodebook(codebook, newCodebook, size);
 		LindeBuzoGray(vector, codebook, newCodebook, size);
 	}
 
