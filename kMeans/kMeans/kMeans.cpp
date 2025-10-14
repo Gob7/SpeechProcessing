@@ -20,7 +20,7 @@ void takeInput(float vector[][P])
 	char line[S];
 
 	// Open input file
-	if (fopen_s(&fin, "C:\\Users\\panda\\Documents\\M Tech\\Sem 1\\Speech Processing\\Record Vector\\Universe.csv", "r") != 0)
+	if (fopen_s(&fin, "C:\\Users\\panda\\Documents\\M Tech\\Sem 1\\Speech Processing\\Record Vector\\Universe.csv", "r"))
 		return;
 
 	// Read data
@@ -103,6 +103,32 @@ float kMeansClustering(float vector[][P], float codebook[][P])
 }
 
 
+void storeOutput(float codebook[][P])
+{
+	FILE *fout;
+    int i, j;
+    if (fopen_s(&fout, "C:\\Users\\panda\\Documents\\M Tech\\Sem 1\\Speech Processing\\Record Vector\\kMeansOutput.csv", "w"))
+        return;
+
+    for (i = 0; i < K; i++) 
+    {
+        for (j = 0; j < P; j++) 
+        {
+            fprintf(fout, "%f", codebook[i][j]);
+
+            // comma separator
+            if (j < P - 1) 
+                fprintf(fout, ","); 
+        }
+        // new line after each row
+        fprintf(fout, "\n"); 
+    }
+	
+    fclose(fout);
+}
+
+
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 	int j, k;
@@ -117,6 +143,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		prevDist = curDist;
 		curDist = kMeansClustering(vector, codebook);
 	}
+	storeOutput(codebook);
 
 	for (j = 0; j < K; j++)
 		printf("%d\t\t", j);

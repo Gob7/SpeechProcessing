@@ -1,4 +1,4 @@
-﻿Build started 13-Oct-25 22:05:17.
+﻿Build started 14-Oct-25 12:43:17.
      1>Project "C:\Users\panda\Documents\M Tech\Sem 1\Speech Processing\kMeans\kMeans\kMeans.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\kMeans.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -25,4 +25,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:06.97
+Time Elapsed 00:00:04.62
