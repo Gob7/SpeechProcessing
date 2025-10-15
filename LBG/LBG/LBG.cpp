@@ -3,12 +3,13 @@
 // Initialization
 #include "stdafx.h"
 
-#define K 8	   // Codebook size
-#define P 12   // LPC prediction order
-#define S 200  // line size
-#define M 6340 // Universe size
-#define E 0.03 // Epsilon
-
+#define K 8		  // Codebook size
+#define P 12	  // LPC prediction order
+#define S 200	  // line size
+#define M 6340	  // Universe size
+#define E 0.03	  // Epsilon
+#define D 0.00001 // Delta: to compare distortion
+int m;			  // Turns to find final codebook
 float WEIGHTS[P] = {1.0, 3.0, 7.0, 13.0, 19.0, 22.0, 25.0, 33.0, 42.0, 50.0, 56.0, 61.0};
 
 void takeInput(float vector[][P])
@@ -40,9 +41,10 @@ void takeInput(float vector[][P])
 	fclose(fin);
 }
 
-int makeCodebook(float codebook[][P], float newCodebook[][P], int size)
+int makeCodebook(float codebook[][P], int size)
 {
 	int i, j;
+	float newCodebook[K][P];
 
 	if (!size)
 	{
@@ -60,11 +62,23 @@ int makeCodebook(float codebook[][P], float newCodebook[][P], int size)
 		}
 	}
 
-	for (i = 0; i < 2 * size; i++)
-		for (j = 0; j < P; j++)
-			codebook[i][j] = newCodebook[i][j];
+	size *= 2;
+	printf("After plus minus epsilon:\n\n");
+	for (i = 0; i < size; i++)
+		printf("%d\t\t", i);
 
-	return 2 * size;
+	for (j = 0; j < P; j++)
+	{
+		printf("\n");
+		for (i = 0; i < size; i++)
+		{
+			codebook[i][j] = newCodebook[i][j];
+			printf("%f\t", codebook[i][j]);
+		}
+	}
+	printf("\n\n\n");
+
+	return size;
 }
 
 void storeOutput(float codebook[][P], int size)
@@ -94,7 +108,7 @@ void storeOutput(float codebook[][P], int size)
 	fclose(fout);
 }
 
-void kMeansClustering(float vector[][P], float codebook[][P], float newCodebook[][P], int size)
+float kMeansClustering(float vector[][P], float codebook[][P], int size)
 {
 	float d, dist, minDist, totalDist = 0.0f, distance[K] = {0.0f}, centroid[K][P] = {0.0f};
 	int i, j, k, group[M], freq[K] = {0};
@@ -128,7 +142,7 @@ void kMeansClustering(float vector[][P], float codebook[][P], float newCodebook[
 			centroid[j][k] += vector[i][k];
 	}
 
-	printf("Turn %d:-\n", size);
+	printf("Turn %d.%d:-\n", size, m);
 	for (j = 0; j < size; j++)
 	{
 		if (freq[j] == 0)
@@ -138,37 +152,35 @@ void kMeansClustering(float vector[][P], float codebook[][P], float newCodebook[
 		printf("%d\t:\t%d\t&\t%f\n", j, freq[j], distance[j]);
 
 		for (k = 0; k < P; k++)
-			newCodebook[j][k] = centroid[j][k] / freq[j];
+			codebook[j][k] = centroid[j][k] / freq[j];
 	}
 
 	totalDist /= (float)M;
 	printf("\nDistortion:\t\t\t%f\n\n\n", totalDist);
+
+	return totalDist;
 }
 
-void LindeBuzoGray(float vector[][P], float codebook[][P], float newCodebook[][P], int size)
+void LindeBuzoGray(float vector[][P], float codebook[][P], int size)
 {
-	int j, k;
-	kMeansClustering(vector, codebook, newCodebook, size);
+	int i, j;
+	float prevDist = 0.0f, curDist = FLT_MAX;
 
-	for (j = 0; j < size; j++)
-		printf("%d\t\t", j);
-	for (k = 0; k < P; k++)
+	m = 0;
+	while (abs(curDist - prevDist) > D)
 	{
-		printf("\n");
-		for (j = 0; j < size; j++)
-		{
-			printf("%f\t", codebook[j][k]);
-			codebook[j][k] = newCodebook[j][k];
-		}
+		m++;
+		prevDist = curDist;
+		curDist = kMeansClustering(vector, codebook, size);
 	}
-	printf("\n\n");
-	for (j = 0; j < size; j++)
-		printf("%d\t\t", j);
-	for (k = 0; k < P; k++)
+
+	for (i = 0; i < size; i++)
+		printf("%d\t\t", i);
+	for (j = 0; j < P; j++)
 	{
 		printf("\n");
-		for (j = 0; j < size; j++)
-			printf("%f\t", codebook[j][k]);
+		for (i = 0; i < size; i++)
+			printf("%f\t", codebook[i][j]);
 	}
 	printf("\n\n\n");
 
@@ -177,14 +189,14 @@ void LindeBuzoGray(float vector[][P], float codebook[][P], float newCodebook[][P
 
 int _tmain(int argc, _TCHAR *argv[])
 {
-	int j, k, size = 0;
-	float vector[M][P], codebook[K][P], newCodebook[K][P];
+	int size = 0;
+	float vector[M][P], codebook[K][P];
 
 	takeInput(vector);
 	while (size < K)
 	{
-		size = makeCodebook(codebook, newCodebook, size);
-		LindeBuzoGray(vector, codebook, newCodebook, size);
+		size = makeCodebook(codebook, size);
+		LindeBuzoGray(vector, codebook, size);
 	}
 
 	return 0;

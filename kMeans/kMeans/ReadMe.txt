@@ -131,6 +131,8 @@ should add to or customize.
 		...
 		Each line represents one 12-dimensional vector.
 
+
+
 7. OUTPUT EXAMPLE
 
 	Console Output:

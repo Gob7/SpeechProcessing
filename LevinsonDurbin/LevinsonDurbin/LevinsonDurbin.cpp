@@ -25,7 +25,7 @@ int _tmain(int argc, _TCHAR *argv[])
 		float r[p + 1] = {0}, a[p + 1] = {0}, a_prev[p + 1] = {0};
 
 		// Open input file
-		if (fopen_s(&fin, input, "r") != 0)
+		if (fopen_s(&fin, input, "r"))
 		{
 			printf("File not found!\n");
 			return 0;
@@ -125,7 +125,7 @@ int _tmain(int argc, _TCHAR *argv[])
 		strcat(output, "_ai.txt");
 
 		// Open output file
-		if (fopen_s(&fout, output, "w") != 0)
+		if (fopen_s(&fout, output, "w"))
 			return 0;
 
 		// Write data

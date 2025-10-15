@@ -59,13 +59,13 @@ Constants Defined:
 	p				12			Number of LPC coefficients to compute.
 
 Program Flow:
-	Step 1 � Processing Multiple Files
-	step 2 � File Reading
-	Step 3 � Energy Calculation (volt[])
-	Step 4 � Voice Activity Detection
-	Step 5 � Autocorrelation Computation
-	Step 6 � Levinson-Durbin Algorithm
-	Step 7 � Save Output
+	1. Processing Multiple Files
+	2. File Reading
+	3. Energy Calculation (volt[])
+	4. Voice Activity Detection
+	5. Autocorrelation Computation
+	6. Levinson-Durbin Algorithm
+	7. Save Output
 
 
 Instructions to Run:

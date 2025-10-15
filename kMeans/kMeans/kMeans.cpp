@@ -85,9 +85,11 @@ float kMeansClustering(float vector[][P], float codebook[][P])
 	printf("Turn %d:-\n", m);
 	for (j = 0; j < K; j++)
 	{
+		if (freq[j] == 0)
+			continue;
+
 		distance[j] /= (float)freq[j];
-		if (m % 10 == 1 || m == 39)
-			printf("%d\t:\t%d\t&\t%f\n", j, freq[j], distance[j]);
+		printf("%d\t:\t%d\t&\t%f\n", j, freq[j], distance[j]);
 
 		for (k = 0; k < P; k++)
 			codebook[j][k] = centroid[j][k] / freq[j];
