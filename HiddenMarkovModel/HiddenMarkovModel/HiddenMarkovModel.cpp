@@ -160,7 +160,7 @@ double forwardProcedure(double A[][N], double B[][M], double P[], int O[])
 	for (i = 0; i < N; i++)
 	{
 		p += a[T - 1][i];
-		printf("a[%d][%d] = %lf\n", T - 1 i, a[T - 1][i]);
+		// printf("a[%d][%d] = %lf\n", T - 1, i, a[T - 1][i]);
 	}
 
 	return p;

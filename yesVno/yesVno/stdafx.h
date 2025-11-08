@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
-
-
+#include <iostream>
+#include <Windows.h>
 
 // TODO: reference additional headers your program requires here

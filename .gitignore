@@ -1,6 +1,11 @@
 # Editor directories and files
 .vscode/
 Debug/
-RecordAllVowels/
 *.exe
 *.pdf
+*.sln
+*.suo
+*.sdf
+*.vcxproj
+*.filters
+*.user
