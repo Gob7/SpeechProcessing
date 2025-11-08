@@ -170,7 +170,7 @@ void findZeroCrossingRate(const int SIZE, int *start, int *end, int *zeroCrossin
 				k++;
 		}
 		zeroCrossingRate[i] = k;
-		printf("zcr[%d] = %d\n", i, k);
+		// printf("zcr[%d] = %d\n", i, k);
 	}
 }
 

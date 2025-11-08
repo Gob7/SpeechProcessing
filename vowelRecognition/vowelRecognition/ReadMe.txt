@@ -37,7 +37,7 @@ Other notes:
 AppWizard uses "TODO:" comments to indicate parts of the source code you
 should add to or customize.
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 1. OVERVIEW
 	This program performs vowel recognition using Linear Predictive Coding (LPC) and Cepstral Analysis.
@@ -79,55 +79,55 @@ should add to or customize.
 	Goal: Create reference templates for each vowel.
 
 	Steps:
-	a)Input Files
+	a. Input Files
 		Each vowel has 20 training files:
 		254101015_a_1.txt, 254101015_a_2.txt, ..., 254101015_a_20.txt
 
-	b)File Reading (takeInput)
+	b. File Reading (takeInput)
 		Reads amplitude samples into amp[].
 		Stops if size exceeds X.
 
-	c)Noise Removal (cutNoise)
+	c. Noise Removal (cutNoise)
 		Divides signal into frames of size N.
 		Computes energy for each frame (volt[]).
 		Finds START and END positions to trim silence/noise.
 
-	d)dcShift() → Remove DC bias.
-	e)normalize() → Normalize signal amplitude.
+	d. dcShift() → Remove DC bias.
+	e. normalize() → Normalize signal amplitude.
 
-	f)Feature Extraction
+	f. Feature Extraction
 		Auto-Correlation (riCompute) → Computes r[i] for each frame.
 		LPC Coefficients (aiCompute) → Uses Levinson-Durbin algorithm to compute a[i].
 		Cepstral Coefficients (ciCompute) → Converts LPC coefficients to cepstral coefficients c[i].
 		Raised Sine Window (ciRaisedSine) → Smooths cepstral features into c_sin[i].
 
-	g)Aggregate Features (addCI and updateCI)
+	g. Aggregate Features (addCI and updateCI)
 		Averages cepstral coefficients across 20 utterances to form the reference template.
 
-	h)Save Reference Template (giveOutput)
+	h. Save Reference Template (giveOutput)
 		Creates one .txt file per vowel containing the averaged coefficients.
 
 
 (II) Testing Phase (TEST = true)
 	Goal: Recognize unknown vowels using reference templates.
 
-	a)Load Reference Templates (readData)
+	a. Load Reference Templates (readData)
 		Reads the five reference template files generated during training.
 
-	b)Process Test Files
+	b. Process Test Files
 		Each vowel has 10 test files:
 		254101015_a_21.txt, 254101015_a_22.txt, ..., 254101015_a_30.txt
 
-	c)Feature Extraction (same steps as training)
+	c. Feature Extraction (same steps as training)
 		cutNoise() → Trim silence.
 		riCompute(), aiCompute(), ciCompute(), ciRaisedSine() → Compute cepstral coefficients.
 
-	d)Classification (tokhuraDistance)
+	d. Classification (tokhuraDistance)
 		Compares test cepstral coefficients with each vowel reference using Tokhura's Distance:
 			distance = Σ(weights[k] * (c_test - c_ref)^2)
 		Chooses the vowel with minimum distance.
 
-	e)Output Results
+	e. Output Results
 		Prints predicted vowel and calculates accuracy per vowel:
 		Accuracy = Correct Predictions / F_TEST
 
@@ -138,7 +138,7 @@ should add to or customize.
 	takeInput()				Reads speech samples from input .txt file.
 	cutNoise()				Detects start and end of speech by energy thresholding.
 	dcShift()				Remove DC bias.
-	e)normalize()			Normalize signal amplitude.
+	normalize()				Normalize signal amplitude.
 	riCompute()				Computes auto-correlation values for each frame.
 	aiCompute()				Computes LPC coefficients using Levinson-Durbin algorithm.
 	ciCompute()				Converts LPC coefficients to cepstral coefficients.
@@ -175,14 +175,12 @@ should add to or customize.
 
 
 6. PROGRAM EXECUTION
-	Training Mode
-		Set:
-		bool TEST = false;
+	a. Training Mode
+		Set: bool TEST = false;
 		Run the program → generates reference files for each vowel.
 
-	Testing Mode
-		Set:
-		bool TEST = true;
+	b. Testing Mode
+		Set: bool TEST = true;
 		Run the program → loads reference templates and classifies each test file.
 
 
@@ -196,32 +194,31 @@ should add to or customize.
 
 
 
-8. SUMMARY OF KEY ARRAYS
-	Array		Size		Purpose
-	amp[]		42000		Raw speech signal samples.
-	volt[]		X/N			Energy per frame for noise detection.
-	r[][]		[W][P+1]	Auto-correlation values for each frame.
-	a[][]		[W][P+1]	LPC coefficients.
-	c[][]		[W][P+1]	Cepstral coefficients.
-	c_sin[][]	[W][P+1]	Raised sine windowed cepstral coefficients.
-	c_ref[][][]	[V][W][P]	Stored reference templates for each vowel.
+8. KEY ARRAYS
+	Array			Purpose
+	amp[42000]		Raw speech signal samples.
+	volt[X/N]		Energy per frame for noise detection.
+	r[W][P+1]		Auto-correlation values for each frame.
+	a[W][P+1]		LPC coefficients.
+	c[W][P+1]		Cepstral coefficients.
+	c_sin[W][P+1]	Raised sine windowed cepstral coefficients.
+	c_ref[V][W][P]	Stored reference templates for each vowel.
 
 
 
-9. Classification Logic
-	Compute Tokhura's Distance between test cepstral vector and each vowel reference:
-	distance = Σ (WEIGHTS[k] * (c_test[k] - c_ref[k])²)
-
-	Prediction Rule:
-	Recognized vowel = vowel with minimum distance
-
+9. CLASSIFICATION LOGIC
+	a. Compute Tokhura's Distance between test cepstral vector and each vowel reference:
+		distance = Σ (WEIGHTS[k] * (c_test[k] - c_ref[k])²)
+	b. Prediction Rule:
+		Recognized vowel = vowel with minimum distance
 
 
-10. Summary
-	This program provides a complete pipeline for vowel recognition:
-	Training Mode: Extracts and averages cepstral features.
-	Testing Mode: Uses Tokhura’s distance to classify test utterances.
-	Implements LPC-based speech feature extraction and template-based matching for recognition.
+
+10. SUMMARY
+	a. This program provides a complete pipeline for vowel recognition:
+	b. Training Mode: Extracts and averages cepstral features.
+	c. Testing Mode: Uses Tokhura’s distance to classify test utterances.
+	d. Implements LPC-based speech feature extraction and template-based matching for recognition.
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

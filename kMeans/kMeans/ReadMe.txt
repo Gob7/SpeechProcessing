@@ -37,7 +37,7 @@ Other notes:
 AppWizard uses "TODO:" comments to indicate parts of the source code you
 should add to or customize.
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 1. OVERVIEW
 	This program implements the K-Means Clustering Algorithm for generating a codebook of speech feature vectors (e.g., LPC/cepstral coefficients).
@@ -84,21 +84,21 @@ should add to or customize.
 			The first K = 8 vectors from the universe are selected as initial centroids.
 
 	(III) Clustering Iterations (kMeansClustering)
-			a) Performs one iteration of K-means clustering:
+			a. Performs one iteration of K-means clustering:
 				For each vector vector[i], compute its Tokhura’s distance to each centroid:
 				dist = Σ WEIGHTS[k] * (codebook[j][k] - vector[i][k])²
 
-			b) Assign vector to the nearest cluster.
+			b. Assign vector to the nearest cluster.
 
-			c) Update:
+			c. Update:
 				centroid[j] ← sum of all vectors in cluster j
 				freq[j] ← number of vectors in cluster j
 				distance[j] ← average cluster distortion
 
-			d) Update new codebook:
+			d. Update new codebook:
 				codebook[j][k] = centroid[j][k] / freq[j]
 
-			e) Compute total distortion across all clusters.
+			e. Compute total distortion across all clusters.
 
 	(IV) Convergence
 			Iteratively call kMeansClustering() until:
@@ -180,4 +180,4 @@ should add to or customize.
 		Generates 8 codebook vectors, each of 12 dimensions.
 		Used in Vector Quantization stages of speech recognition pipelines.
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
