@@ -37,32 +37,36 @@ Other notes:
 AppWizard uses "TODO:" comments to indicate parts of the source code you
 should add to or customize.
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 1. OVERVIEW
-    This program implements the Forward Algorithm of the Hidden Markov Model (HMM) 
-    to compute the likelihood probability P(O∣λ) of a given observation sequence for a trained model.
-    
-    It uses three HMM parameters 
-    — State Transition Matrix (A), Observation Probability Matrix (B), and Initial State Probability Matrix (P) 
-    — along with an observation sequence (O) to evaluate how well the model explains the sequence.
+    Implements an HMM toolkit that:
+    a. Loads HMM parameters (A, B, P) and an observation sequence (O).
+    b. Computes observation likelihood using the Forward algorithm.
+    c. Computes backward probabilities (Backward algorithm).
+    d. Optionally computes the most likely state sequence (Viterbi).
+    e. Re-estimates HMM parameters using Baum–Welch (EM) and writes final matrices.
 
 
 
 2. OBJECTIVES
-    a. To load HMM parameters (A, B, P) and observation sequence (O) from files.
-    b. To apply the Forward Procedure for computing P(O∣λ).
-    c. To validate speech pattern likelihood in recognition systems.
+    a. Evaluate P(O∣λ) for a trained model.
+    b. Re-train (refine) HMM parameters from a single observation sequence via Baum–Welch.
+    c. Provide utilities to inspect and persist model matrices.
 
 
 
-3. iNPUT and OUTPUT
+3. INPUT and OUTPUT
     Type	        Description
-    Input Files	    - HMM_A_MATRIX.csv – State transition matrix (N × N)
-                    - HMM_B_MATRIX.csv – Observation probability matrix (N × M)
-                    - HMM_P_MATRIX.csv – Initial state probabilities (1 × N)
+    Input Files	    - HMM_MATRIX_A.csv – State transition matrix (N × N)
+                    - HMM_MATRIX_B.csv – Observation probability matrix (N × M)
+                    - HMM_MATRIX_P.csv – Initial state probabilities (1 × N)
                     - HMM_OBSERVATION_SEQUENCE.csv – Observation sequence (1 × T)
+    
     Output	        Probability value (P(O∣λ))
+                    - HMM_FINAL_P.csv
+                    - HMM_FINAL_A.csv
+                    - HMM_FINAL_B.csv
 
 
 
@@ -74,61 +78,74 @@ should add to or customize.
 
 
 
-5. ALGORITHM: Forward Procedure
-
-	(I) Initialization
-            For each state i: 
-            α[1][i] = pi[i] * b[i][O[1]]
-
-	(II) Induction
-            For t=2,3,…,T and for each state j:
-            α[t][j] = {Σ α[t-1][i] * a[i][j]} * b[j][O[t]]
-
-	(III) Termination
-            The final probability is:
-            P(O∣λ) = Σ α[T][i]
+5. GLOBAL DATA STRUCTURES
+    double A[N][N]  — state transition probability matrix a[i][j]
+    double B[N][M]  — observation probability matrix b[j](k).
+    double P[N]     — initial state distribution π[i]
+    int O[T]        — observation sequence (0-indexed symbols).
             
 
 
 6. KEY FUNCTIONS
-    Function	        Description
-    readAMatrix()	    Reads transition probabilities (A) from CSV file.
-    readBMatrix()	    Reads observation probabilities (B) from CSV file.
-    readPMatrix()	    Reads initial state probabilities (P) from CSV file.
-    readOMatrix()	    Reads observation sequence (O) from CSV file.
-    forwardProcedure()	Implements the forward algorithm to compute (P(O∣λ))
+    Function	            Description
+    readAMatrix()	        Reads transition probabilities (A) from CSV file.
+    readBMatrix()	        Reads observation probabilities (B) from CSV file.
+    readPMatrix()	        Reads initial state probabilities (P) from CSV file.
+    readOMatrix()	        Reads observation sequence (O) from CSV file.
+    makeUnbiasedMatrix()    Set uniform initial values for P, A, B (fallback).
+    finalMatrix()           Write P, A, B into CSV files.
+
+    forwardProcedure()      Compute forward probabilities alpha[t][i] and return P(O∣λ).
+        a. Initialization:      alpha[0][i] = P[i]*B[i][O[0]].
+        b. Induction:           alpha[t][j] = (Σ_i alpha[t-1][i]*A[i][j]) * B[j][O[t]].
+        c. Termination:         Σ_i alpha[T-1][i].
+
+    backwardProcedure()     Compute backward probabilities beta[t][i].
+        a. Initialization:      beta[T-1][i] = 1.
+        b. Induction:           beta[t][i] = Σ_j A[i][j]*B[j][O[t+1]]*beta[t+1][j].
+
+    viterbiProcedure()      Compute most likely state sequence and its probability using Viterbi.
+        a. Initialization:      delta[0][i] = P[i]*B[i][O[0]]; 
+        b. Induction:           recursion uses max over previous states; backtrace via psi.
+
+    baumWelchProcedure      Single EM (Baum–Welch) re-estimation step:
+        a. Initialization:
+                                xi[t][i][j] = alpha[t][i] * A[i][j] * B[j][O[t+1]] * beta[t+1][j]
+                                (normalize by sum).
+                                gamma[t][i] = Σ_j xi[t][i][j] 
+                                (and last gamma[T-1] from alpha).
+        b. Re-estimate:
+                                P[i] = gamma[0][i].
+                                A[i][j] = Σ_t xi[t][i][j] / Σ_t gamma[t][i].
+                                B[j][k] = Σ_{t:O[t]==k} gamma[t][j] / Σ_t gamma[t][j].
 
 
 
-7. Flow of Execution
-    a. Start the program.
-    b. Load all HMM matrices (A, B, P, and O).
-    c. Initialize the α (alpha) matrix.
-    d. Perform recursive computation using transition and observation probabilities.
-    e. Sum the final α values to compute overall probability.
-    f. Display P(O∣λ).
+7. PROGRAM FLOW
+    a. Read A, B, P, O via respective readers (or set uniform matrix).
+    b. printMatrix() — inspect initial model.
+    c. Compute probability = forwardProcedure(alpha).
+    d. Compute beta via backwardProcedure(beta).
+    e. Optionally compute Viterbi path (viterbiProcedure) — code present but commented out.
+    f. Loop (example: 10 iterations shown):
+        i. Call baumWelchProcedure(alpha, beta, gamma, xi) to re-estimate A, B, P.
+        ii. Recompute forward/backward and print updated probability and matrices.
+    g. Write final matrices with finalMatrix().
 
 
 
-8. Example Console Output
-    O[0] = 11
-    a[0][0] = 0.024560 = 0.5 * 0.04912
-    a[0][1] = 0.015240 = 0.3 * 0.05080
-    ...
-    a[84][0] = 0.000000012
-    a[84][1] = 0.000000018
-    a[84][2] = 0.000000010
-    a[84][3] = 0.000000007
-    a[84][4] = 0.000000009
-
-    P(O | y) = 0.000000056
+8. CONSOLE OUTPUT
+    a. Initial matrix printout: P, rows of A and B, column sums of B.
+    b. P(O | λ) printed after forward pass.
+    c. After each Baum–Welch iteration: updated matrices and P(O | λ).
+    d. Final CSV files: HMM_FINAL_P.csv, HMM_FINAL_A.csv, HMM_FINAL_B.csv.
 
 
 
-9. Applications
+9. APPLICATION
     a. Speech recognition probability evaluation.
     b. Pattern likelihood estimation in acoustic modeling.
     c. Sequence analysis in bio-informatics and signal processing.
     d. Training and validation of HMM parameters.
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
