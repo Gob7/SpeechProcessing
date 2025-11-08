@@ -7,6 +7,7 @@ ipch/
 *.sln
 *.suo
 *.sdf
+*.opensdf
 *.vcxproj
 *.filters
 *.user
